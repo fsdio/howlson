@@ -1,10 +1,11 @@
 <script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import ApplicationLogo from '@/components/ApplicationLogo.vue';
+import Dropdown from '@/components/Dropdown.vue';
+import DropdownLink from '@/components/DropdownLink.vue';
+import NavLink from '@/components/NavLink.vue';
+import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
+import Footer from '@/components/Footer.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -38,6 +39,30 @@ const showingNavigationDropdown = ref(false);
                                     :active="route().current('dashboard')"
                                 >
                                     Dashboard
+                                </NavLink>
+                                <NavLink
+                                    :href="route('roles.index')"
+                                    :active="route().current('roles.index')"
+                                >
+                                    Roles
+                                </NavLink>
+                                <NavLink
+                                    :href="route('permissions.index')"
+                                    :active="route().current('permissions.index')"
+                                >
+                                    Permissions
+                                </NavLink>
+                                <NavLink
+                                    :href="route('is-admin')"
+                                    :active="route().current('is-admin')"
+                                >
+                                    Is Admin
+                                </NavLink>
+                                <NavLink
+                                    :href="route('is-user')"
+                                    :active="route().current('is-user')"
+                                >
+                                    Is User
                                 </NavLink>
                             </div>
                         </div>
@@ -146,6 +171,30 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('roles.index')"
+                            :active="route().current('roles.index')"
+                        >
+                            Roles
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('permissions.index')"
+                            :active="route().current('permissions.index')"
+                        >
+                            Permissions
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('is-admin')"
+                            :active="route().current('is-admin')"
+                        >
+                            Is Admin
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('is-user')"
+                            :active="route().current('is-user')"
+                        >
+                            Is User
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -194,5 +243,8 @@ const showingNavigationDropdown = ref(false);
                 <slot />
             </main>
         </div>
+        
+        <!-- Footer -->
+        <Footer />
     </div>
 </template>
