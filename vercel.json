@@ -1,10 +1,8 @@
 {
     "version": 2,
-    "framework": null,
-    "buildCommand": "composer install --no-dev --optimize-autoloader && bun install && bun run build",
+    "buildCommand": "bun install && bun run build",
     "outputDirectory": "public",
     "installCommand": "bun install",
-    "devCommand": "php artisan serve --host=0.0.0.0 --port=$PORT",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.6.0"
@@ -19,6 +17,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
+        "APP_URL": "https://howlson.vercel.app",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie"
     }

@@ -3,20 +3,16 @@ import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { useNavigation } from '@/composables/useNavigation';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, Folder } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-];
+// Menggunakan composable terpusat untuk navigasi
+const { mainNavItems, footerNavItems } = useNavigation();
 
-const footerNavItems: NavItem[] = [
+// Footer items dengan icon yang sudah di-import
+const footerItems = [
     {
         title: 'Github Repo',
         href: 'https://github.com/laravel/vue-starter-kit',
@@ -49,7 +45,7 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <NavFooter :items="footerItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

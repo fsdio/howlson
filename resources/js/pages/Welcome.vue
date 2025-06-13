@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Footer from '@/components/Footer.vue';
 
@@ -19,6 +20,40 @@ defineProps({
         required: true,
     },
 });
+
+const currentSlide = ref(0);
+const totalSlides = 15;
+const slidesToShow = 3;
+const maxSlide = Math.max(0, totalSlides - slidesToShow);
+
+const nextSlide = () => {
+    if (currentSlide.value < maxSlide) {
+        currentSlide.value += 1;
+    } else {
+        currentSlide.value = 0;
+    }
+};
+
+const prevSlide = () => {
+    if (currentSlide.value > 0) {
+        currentSlide.value -= 1;
+    } else {
+        currentSlide.value = maxSlide;
+    }
+};
+
+const goToSlide = (index) => {
+    currentSlide.value = Math.min(index, maxSlide);
+};
+
+// Generate image data
+const images = Array.from({ length: 17 }, (_, index) => ({
+    id: index + 1,
+    src: `https://picsum.photos/800/600?random=${index + 1}`,
+    alt: `Gambar ${index + 1}`,
+    title: `Foto ${index + 1}`,
+    description: `Deskripsi untuk foto ke-${index + 1}`
+}));
 </script>
 
 <template>
@@ -32,7 +67,7 @@ defineProps({
                     <ApplicationLogo class="h-20 w-20 fill-current text-gray-800" />
                 </div>
                 <div class="text-center">
-                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Howlson</h1>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">howlson</h1>
                     <p class="text-lg text-gray-600">Platform Manajemen Peran & Izin</p>
                 </div>
             </div>
@@ -65,40 +100,78 @@ defineProps({
                 </template>
             </div>
 
-            <!-- Feature Cards -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-6xl">
-                <!-- Card 1: Role Management -->
-                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                        </svg>
+            <!-- Image Slider -->
+            <div class="relative max-w-5xl w-full">
+                <!-- Slider Container -->
+                <div class="overflow-hidden rounded-lg shadow-lg">
+                    <div class="flex transition-transform duration-500 ease-in-out" :style="{ transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)` }">
+                        <!-- Dynamic Image Slides -->
+                        <div 
+                            v-for="(image, index) in images" 
+                            :key="image.id"
+                            class="flex-shrink-0 relative px-1"
+                            :style="{ width: `${100 / slidesToShow}%` }"
+                        >
+                            <div class="relative group">
+                                <img 
+                                    :src="image.src" 
+                                    :alt="image.alt"
+                                    class="w-full h-96 object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg"
+                                    loading="lazy"
+                                />
+                                <!-- Overlay with image info -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                                    <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                        <h3 class="text-lg font-semibold mb-1">{{ image.title }}</h3>
+                                        <p class="text-xs opacity-90">{{ image.description }}</p>
+                                    </div>
+                                </div>
+                                <!-- Image counter -->
+                                <div class="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                                    {{ index + 1 }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Manajemen Peran</h3>
-                    <p class="text-gray-600 text-sm">Kelola peran pengguna dengan mudah dan fleksibel sesuai kebutuhan organisasi Anda.</p>
                 </div>
 
-                <!-- Card 2: Permission Control -->
-                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Kontrol Izin</h3>
-                    <p class="text-gray-600 text-sm">Atur izin akses dengan detail untuk menjaga keamanan dan integritas sistem.</p>
-                </div>
+                <!-- Navigation Arrows -->
+                <button 
+                    @click="prevSlide" 
+                    class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                
+                <button 
+                    @click="nextSlide" 
+                    class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
 
-                <!-- Card 3: User Management -->
-                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Manajemen Pengguna</h3>
-                    <p class="text-gray-600 text-sm">Kelola data pengguna dan assign peran dengan interface yang intuitif dan mudah digunakan.</p>
+                <!-- Dots Indicator -->
+                <div class="flex justify-center mt-6 space-x-1 flex-wrap max-w-md mx-auto">
+                    <button 
+                        v-for="slideIndex in Math.ceil(totalSlides / slidesToShow)" 
+                        :key="slideIndex - 1"
+                        @click="goToSlide((slideIndex - 1) * slidesToShow)"
+                        class="w-2 h-2 rounded-full transition-all duration-200 m-1"
+                        :class="Math.floor(currentSlide / slidesToShow) === slideIndex - 1 ? 'bg-gray-800 scale-125' : 'bg-gray-300 hover:bg-gray-400'"
+                        :title="`Slide ${slideIndex}`"
+                    ></button>
+                </div>
+                
+                <!-- Slide Info -->
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">
+                        Menampilkan gambar {{ currentSlide + 1 }} sampai {{ Math.min(currentSlide + slidesToShow, totalSlides) }} dari total {{ totalSlides }} gambar
+                        (Slide {{ Math.floor(currentSlide / slidesToShow) + 1 }} dari {{ Math.ceil(totalSlides / slidesToShow) }})
+                    </p>
                 </div>
             </div>
 

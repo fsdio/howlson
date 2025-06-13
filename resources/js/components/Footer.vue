@@ -11,7 +11,7 @@ import ApplicationLogo from '@/components/ApplicationLogo.vue';
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center mb-4">
                         <ApplicationLogo class="h-8 w-auto fill-current text-white" />
-                        <span class="ml-2 text-xl font-bold">Howlson</span>
+                        <span class="ml-2 text-xl font-bold">howlson</span>
                     </div>
                     <p class="text-gray-300 text-sm leading-relaxed">
                         Platform manajemen peran dan izin yang powerful untuk aplikasi modern. 
@@ -75,7 +75,7 @@ import ApplicationLogo from '@/components/ApplicationLogo.vue';
                         <li class="text-gray-300 text-sm">
                             <span class="block">Email:</span>
                             <a href="mailto:info@howlson.com" class="hover:text-white transition-colors">
-                                info@howlson.com
+                    info@howlson.com
                             </a>
                         </li>
                         <li class="text-gray-300 text-sm">
@@ -96,7 +96,7 @@ import ApplicationLogo from '@/components/ApplicationLogo.vue';
             <div class="mt-8 border-t border-gray-700 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-400 text-sm">
-                        © {{ new Date().getFullYear() }} Howlson. Semua hak dilindungi.
+                        © {{ new Date().getFullYear() }} howlson. Semua hak dilindungi.
                     </p>
                     <div class="mt-4 md:mt-0 flex space-x-6">
                         <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">
