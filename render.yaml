@@ -14,17 +14,20 @@ services:
       bun install
       echo "Building frontend assets..."
       bun run build
+      echo "Setting up storage directories..."
+      mkdir -p storage/logs
+      mkdir -p storage/framework/cache
+      mkdir -p storage/framework/sessions
+      mkdir -p storage/framework/views
+      mkdir -p bootstrap/cache
       echo "Setting up database..."
-      mkdir -p /opt/render/project/src/database
-      touch /opt/render/project/src/database/database.sqlite
-      chmod 664 /opt/render/project/src/database/database.sqlite
-      chmod 775 /opt/render/project/src/database
-      echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database OK\n'; } catch(Exception \$e) { echo 'DB Error: ' . \$e->getMessage() . '\n'; exit(1); }"
-      echo "Caching configuration..."
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
+      mkdir -p database
+      touch database/database.sqlite
+      chmod 664 database/database.sqlite
+      chmod 775 database
+      echo "Setting permissions..."
+      chmod -R 775 storage
+      chmod -R 775 bootstrap/cache
       echo "Build completed successfully!"
     startCommand: |
       set -e
@@ -42,27 +45,21 @@ services:
       fi
       
       echo "Checking database file..."
-      if [ ! -f "/opt/render/project/src/database/database.sqlite" ]; then
+      if [ ! -f "database/database.sqlite" ]; then
         echo "Creating database file..."
-        mkdir -p /opt/render/project/src/database
-        touch /opt/render/project/src/database/database.sqlite
-        chmod 664 /opt/render/project/src/database/database.sqlite
-        chmod 775 /opt/render/project/src/database
+        mkdir -p database
+        touch database/database.sqlite
+        chmod 664 database/database.sqlite
+        chmod 775 database
       fi
       
       echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
-      
-      echo "Clearing cache..."
-      php artisan config:clear
-      php artisan cache:clear
-      php artisan view:clear
-      php artisan route:clear
+      php -r "try { \$pdo = new PDO('sqlite:' . getcwd() . '/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
       
       echo "Running migrations..."
       php artisan migrate --force
       
-      echo "Caching for production..."
+      echo "Optimizing for production..."
       php artisan config:cache
       php artisan route:cache
       php artisan view:cache
@@ -79,7 +76,7 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
-        value: /opt/render/project/src/database/database.sqlite
+        value: database/database.sqlite
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
@@ -90,11 +87,9 @@ services:
         value: errorlog
       - key: LOG_LEVEL
         value: error
-      - key: DB_CONNECTION
-        value: sqlite
-      - key: DB_DATABASE
-        value: /opt/render/project/src/database/database.sqlite
-      - key: SESSION_DRIVER
-        value: database
-      - key: CACHE_STORE
-        value: database
+      - key: SESSION_LIFETIME
+        value: 120
+      - key: SESSION_ENCRYPT
+        value: false
+      - key: BCRYPT_ROUNDS
+        value: 12

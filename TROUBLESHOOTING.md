@@ -1,121 +1,135 @@
-# Troubleshooting Guide
+# Panduan Troubleshooting - Howlson Laravel Project
 
-## Common Issues and Solutions
+## Error 502 Bad Gateway di Render
 
-### 1. Error 500 - Internal Server Error
+### Penyebab Umum:
+1. **Path Database Salah**: Path absolut `/opt/render/project/src/database/database.sqlite` tidak valid
+2. **Environment Variables Tidak Lengkap**: APP_KEY atau PORT tidak diset
+3. **Permission Issues**: File database atau direktori storage tidak memiliki permission yang benar
+4. **Build Process Gagal**: Dependencies tidak terinstall dengan benar
 
-**CRITICAL: Path Consistency Fixed**
-All database paths have been standardized to: `/opt/render/project/src/database/database.sqlite`
+### Solusi yang Sudah Diterapkan:
 
-**Possible causes:**
-- Database connection issues (FIXED: Path inconsistency resolved)
-- Missing APP_KEY (FIXED: Auto-generated in render.yaml)
-- File permissions problems (FIXED: Proper permissions set)
-- Cache configuration issues (FIXED: Cache clearing added to startup)
-- Environment variables not set properly
+#### 1. Perbaikan Path Database
+- **Sebelum**: `/opt/render/project/src/database/database.sqlite`
+- **Sesudah**: `database/database.sqlite` (relative path)
+- **File yang diperbaiki**: `render.yaml`, `build.sh`, `start.sh`, `.env.render`
 
-**Solutions:**
-1. Check database file exists and is writable:
-```bash
-ls -la /opt/render/project/src/database/database.sqlite
+#### 2. Perbaikan Environment Variables
+- Menghapus duplikasi environment variables di `render.yaml`
+- Menambahkan environment variables yang hilang:
+  - `SESSION_LIFETIME=120`
+  - `SESSION_ENCRYPT=false`
+  - `BCRYPT_ROUNDS=12`
+
+#### 3. Perbaikan Build Process
+- Menambahkan setup direktori storage yang lengkap
+- Memperbaiki permission setting
+- Menggunakan relative path untuk database
+
+### Langkah Deploy Ulang:
+
+1. **Push perubahan ke repository**:
+   ```bash
+   git add .
+   git commit -m "Fix 502 Bad Gateway - Update database paths and environment config"
+   git push origin main
+   ```
+
+2. **Di Render Dashboard**:
+   - Buka service Anda
+   - Klik "Manual Deploy" untuk trigger build ulang
+   - Monitor logs untuk memastikan build berhasil
+
+3. **Verifikasi Environment Variables**:
+   Pastikan environment variables berikut sudah diset di Render Dashboard:
+   ```
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_KEY=base64:GENERATE_NEW_KEY_HERE
+   DB_CONNECTION=sqlite
+   DB_DATABASE=database/database.sqlite
+   SESSION_DRIVER=database
+   CACHE_STORE=database
+   QUEUE_CONNECTION=database
+   LOG_CHANNEL=errorlog
+   LOG_LEVEL=error
+   SESSION_LIFETIME=120
+   SESSION_ENCRYPT=false
+   BCRYPT_ROUNDS=12
+   ```
+
+### Monitoring dan Debugging:
+
+#### 1. Cek Logs di Render
+- Buka Render Dashboard → Service → Logs
+- Perhatikan error messages saat build dan startup
+- Cari pesan error seperti:
+  - "Database connection failed"
+  - "APP_KEY is not set"
+  - "Permission denied"
+
+#### 2. Test Database Connection
+Jika masih ada masalah database, cek di logs apakah ada pesan:
+```
+Database connection OK
 ```
 
-2. Test database connection:
-```bash
-php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'OK'; } catch(Exception \$e) { echo \$e->getMessage(); }"
+#### 3. Verifikasi File Structure
+Pastikan struktur file setelah build:
+```
+/
+├── database/
+│   └── database.sqlite
+├── storage/
+│   ├── logs/
+│   └── framework/
+│       ├── cache/
+│       ├── sessions/
+│       └── views/
+└── bootstrap/
+    └── cache/
 ```
 
-3. Verify environment variables in Render Dashboard:
-   - APP_KEY (should be auto-generated)
-   - DB_CONNECTION=sqlite
-   - DB_DATABASE=/opt/render/project/src/database/database.sqlite
-   - SESSION_DRIVER=database
-   - CACHE_STORE=database
-   - QUEUE_CONNECTION=database
+### Masalah Lain yang Mungkin Terjadi:
 
-4. Check Render deployment logs for specific errors
-5. If still failing, temporarily set APP_DEBUG=true to see detailed errors
+#### 1. Build Timeout
+**Gejala**: Build process terhenti di tengah jalan
+**Solusi**: 
+- Gunakan plan yang lebih tinggi di Render
+- Optimasi dependencies di `package.json`
 
-### 2. Build Failures
+#### 2. Memory Issues
+**Gejala**: Application crash dengan out of memory
+**Solusi**:
+- Tambahkan `memory_limit` di PHP configuration
+- Optimasi cache configuration
 
-#### Frontend Build Issues:
-```bash
-# Clear node modules and reinstall
-rm -rf node_modules
-bun install
-bun run build
-```
+#### 3. Asset Build Gagal
+**Gejala**: Frontend assets tidak ter-build
+**Solusi**:
+- Cek `bun run build` berhasil
+- Verifikasi `vite.config.ts` configuration
 
-#### PHP Dependencies:
-```bash
-# Clear composer cache and reinstall
-composer clear-cache
-composer install --no-dev --optimize-autoloader
-```
+### Kontak dan Support:
 
-### 3. Database Issues
+Jika masalah masih berlanjut:
+1. Cek logs detail di Render Dashboard
+2. Pastikan semua environment variables sudah benar
+3. Coba deploy ulang dengan "Clear build cache"
+4. Hubungi support Render jika diperlukan
 
-#### Migration Failures:
-```bash
-# Reset database (WARNING: This will delete all data)
-php artisan migrate:fresh --force
+### Changelog Perbaikan:
 
-# Or rollback and re-run
-php artisan migrate:rollback
-php artisan migrate --force
-```
+**v1.1.0 - Fix 502 Bad Gateway**
+- ✅ Perbaiki path database dari absolute ke relative
+- ✅ Hapus duplikasi environment variables
+- ✅ Tambah environment variables yang hilang
+- ✅ Perbaiki permission setting
+- ✅ Optimasi build process
+- ✅ Update dokumentasi troubleshooting
 
-#### SQLite Permission Issues:
-```bash
-# Ensure database directory and file have correct permissions
-mkdir -p database
-touch database/database.sqlite
-chmod 775 database
-chmod 664 database/database.sqlite
-```
-
-### 4. Render Deployment Issues
-
-#### Environment Variables:
-Ensure these are set in Render Dashboard:
-- `APP_KEY` (generate new one)
-- `APP_ENV=production`
-- `APP_DEBUG=false`
-- `DB_CONNECTION=sqlite`
-- `DB_DATABASE=/opt/render/project/src/database/database.sqlite`
-
-#### Port Binding:
-Make sure your application binds to `0.0.0.0:$PORT`
-
-### 5. Logs and Debugging
-
-#### Check Laravel Logs:
-```bash
-tail -f storage/logs/laravel.log
-```
-
-#### Enable Debug Mode (temporarily):
-Set `APP_DEBUG=true` in environment variables, then check browser console and network tab for detailed errors.
-
-#### Check Render Logs:
-Go to Render Dashboard > Your Service > Logs to see deployment and runtime logs.
-
-## Prevention Tips
-
-1. **Always test locally before deploying**
-2. **Use consistent paths across all configuration files**
-3. **Keep dependencies up to date**
-4. **Monitor logs regularly**
-5. **Use proper error handling in your code**
-6. **Test database connections in build scripts**
-
-## Quick Health Check
-
-Run this command to check basic application health:
-
-```bash
-# Check if all critical components are working
-php artisan about
-php artisan route:list
-php artisan migrate:status
-```
+**Tested on**: Render Free Plan
+**Laravel Version**: 12.x
+**PHP Version**: 8.2+
+**Node Version**: Latest LTS

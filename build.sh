@@ -27,19 +27,19 @@ mkdir -p bootstrap/cache
 
 # Create database directory and SQLite file
 echo "Setting up SQLite database..."
-mkdir -p /opt/render/project/src/database
-touch /opt/render/project/src/database/database.sqlite
+mkdir -p database
+touch database/database.sqlite
 
 # Set proper permissions
 echo "Setting permissions..."
 chmod -R 775 storage
 chmod -R 775 bootstrap/cache
-chmod 664 /opt/render/project/src/database/database.sqlite
-chmod 775 /opt/render/project/src/database
+chmod 664 database/database.sqlite
+chmod 775 database
 
 # Test database connection
 echo "Testing database connection..."
-php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection successful\n'; } catch(Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage() . '\n'; exit(1); }"
+php -r "try { \$pdo = new PDO('sqlite:' . getcwd() . '/database/database.sqlite'); echo 'Database connection successful\n'; } catch(Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage() . '\n'; exit(1); }"
 
 # Cache Laravel configuration
 echo "Caching Laravel configuration..."
