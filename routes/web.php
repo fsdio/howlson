@@ -11,7 +11,40 @@ use App\Http\Controllers\Admin\ProductCategoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+
+// Health Check Endpoint for Render.com monitoring
+Route::get('/health', function () {
+    try {
+        // Test database connection
+        DB::connection()->getPdo();
+        
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now()->toISOString(),
+            'app' => config('app.name'),
+            'version' => config('app.version', '1.0.0'),
+            'environment' => config('app.env'),
+            'database' => 'connected',
+            'uptime' => now()->diffInSeconds(new \DateTime('@' . $_SERVER['REQUEST_TIME']))
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'timestamp' => now()->toISOString(),
+            'app' => config('app.name'),
+            'environment' => config('app.env'),
+            'database' => 'disconnected',
+            'error' => $e->getMessage()
+        ], 503);
+    }
+})->name('health.check');
+
+// Simplified health check for basic monitoring
+Route::get('/ping', function () {
+    return response()->json(['status' => 'pong', 'timestamp' => now()->toISOString()], 200);
+})->name('health.ping');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

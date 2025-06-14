@@ -29,10 +29,21 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Check if APP_KEY is set
+# Generate APP_KEY if not set or is placeholder
 echo "Checking APP_KEY..."
-if [ -z "$APP_KEY" ]; then
-    echo "Warning: APP_KEY is not set!"
+if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:GENERATE_NEW_KEY_IN_RENDER_DASHBOARD" ]; then
+    echo "Generating new APP_KEY..."
+    NEW_APP_KEY=$(php artisan key:generate --show)
+    echo "Generated APP_KEY: $NEW_APP_KEY"
+    export APP_KEY="$NEW_APP_KEY"
+    
+    # Update .env file if it exists
+    if [ -f ".env" ]; then
+        echo "Updating APP_KEY in .env file..."
+        sed -i "s|^APP_KEY=.*|APP_KEY=$NEW_APP_KEY|" .env
+    fi
+else
+    echo "Using existing APP_KEY: $APP_KEY"
 fi
 
 # Start the Laravel application

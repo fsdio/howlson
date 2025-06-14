@@ -67,29 +67,59 @@ services:
       echo "Starting server on port $PORT..."
       php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
+      - key: APP_NAME
+        value: Howlson
       - key: APP_ENV
         value: production
+      - key: APP_KEY
+        value: base64:GENERATE_NEW_KEY_IN_RENDER_DASHBOARD
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        generateValue: true
+      - key: APP_URL
+        value: https://howlson.onrender.com
+      - key: LOG_CHANNEL
+        value: errorlog
+      - key: LOG_LEVEL
+        value: error
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
         value: database/database.sqlite
       - key: SESSION_DRIVER
         value: database
-      - key: CACHE_STORE
-        value: database
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: LOG_CHANNEL
-        value: errorlog
-      - key: LOG_LEVEL
-        value: error
       - key: SESSION_LIFETIME
         value: 120
       - key: SESSION_ENCRYPT
         value: false
+      - key: SESSION_PATH
+        value: /
+      - key: SESSION_DOMAIN
+        value: null
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_HOST
+        value: 127.0.0.1
+      - key: MAIL_PORT
+        value: 2525
+      - key: MAIL_USERNAME
+        value: null
+      - key: MAIL_PASSWORD
+        value: null
+      - key: MAIL_ENCRYPTION
+        value: null
+      - key: MAIL_FROM_ADDRESS
+        value: hello@example.com
+      - key: MAIL_FROM_NAME
+        value: Howlson
       - key: BCRYPT_ROUNDS
         value: 12
+      - key: PHP_CLI_SERVER_WORKERS
+        value: 4

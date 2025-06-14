@@ -66,6 +66,12 @@ RUN chown -R www-data:www-data /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage
 RUN chmod -R 775 /var/www/bootstrap/cache
 
-# Expose port 8000 and start php-fpm server
+# Copy startup script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Expose port 8000
 EXPOSE 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+
+# Use custom entrypoint script
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

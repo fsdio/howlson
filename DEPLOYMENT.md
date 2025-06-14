@@ -1,97 +1,107 @@
-# Deployment Guide untuk Render.com
+# Deployment Guide - Automatic APP_KEY Generation
 
-Panduan ini akan membantu Anda melakukan deployment aplikasi Laravel Vue ke Render.com.
+## Overview
+Proyek ini telah dikonfigurasi untuk secara otomatis generate `APP_KEY` baru setiap kali deploy, baik menggunakan Docker maupun Render. Ini memastikan keamanan aplikasi dan mengatasi masalah error 500 yang disebabkan oleh `APP_KEY` yang tidak valid.
 
-## Persiapan Sebelum Deploy
+## Fitur Otomatis
 
-### 1. Pastikan Semua File Deployment Sudah Ada
+### 1. Generate APP_KEY Otomatis
+- **Docker**: Script `docker-entrypoint.sh` akan generate `APP_KEY` baru setiap container dimulai
+- **Render**: Script `build.sh` dan `start.sh` akan generate `APP_KEY` baru setiap deploy
+- **Update .env**: File `.env` akan diupdate otomatis dengan `APP_KEY` yang baru
 
-File-file berikut sudah dibuat untuk deployment:
-- `render.yaml` - Konfigurasi service Render
-- `Dockerfile` - Container configuration dengan bun
-- `build.sh` - Script build untuk production menggunakan bun
-- `start.sh` - Script start aplikasi
-- `.env.render` - Template environment variables
+### 2. Database Setup Otomatis
+- Membuat file `database/database.sqlite` jika belum ada
+- Menjalankan migrasi database otomatis
+- Membuat tabel sessions untuk database sessions
+- Mengatur permissions yang tepat
 
-### 2. Push Code ke Repository Git
+### 3. Production Optimization
+- Cache konfigurasi Laravel
+- Cache routes
+- Cache views
+- Optimasi untuk environment production
 
-Pastikan semua perubahan sudah di-commit dan push ke repository Git (GitHub, GitLab, atau Bitbucket):
+## File yang Dimodifikasi
 
+### 1. `docker-entrypoint.sh` (Baru)
+- Script entrypoint untuk Docker container
+- Generate `APP_KEY` otomatis
+- Update file `.env`
+- Setup database dan migrasi
+- Start Laravel server
+
+### 2. `Dockerfile`
+- Menggunakan `docker-entrypoint.sh` sebagai entrypoint
+- Menggantikan `CMD` dengan `ENTRYPOINT`
+
+### 3. `build.sh`
+- Ditambahkan proses generate `APP_KEY`
+- Membuat tabel sessions
+- Update file `.env` jika ada
+
+### 4. `start.sh`
+- Ditambahkan proses generate `APP_KEY`
+- Update file `.env` jika ada
+
+### 5. `render.yaml`
+- Environment variables lengkap
+- `APP_KEY` dengan placeholder yang akan di-generate
+
+## Cara Deploy
+
+### Docker
 ```bash
-git add .
-git commit -m "Add Render.com deployment configuration"
-git push origin main
+# Build image
+docker build -t howlson .
+
+# Run container
+docker run -p 8000:8000 howlson
 ```
 
-## Langkah-langkah Deployment
+### Render
+1. Push code ke repository
+2. Render akan otomatis menjalankan `build.sh`
+3. Kemudian menjalankan `start.sh`
+4. `APP_KEY` akan di-generate otomatis
 
-### 1. Buat Akun di Render.com
+## Environment Variables
 
-1. Kunjungi [render.com](https://render.com)
-2. Daftar atau login dengan akun GitHub/GitLab/Bitbucket
-3. Connect repository Anda
+Semua environment variables sudah dikonfigurasi di `render.yaml`:
 
-### 2. Database Configuration (SQLite)
+- `APP_KEY`: Akan di-generate otomatis
+- `DB_CONNECTION`: sqlite
+- `DB_DATABASE`: database/database.sqlite
+- `SESSION_DRIVER`: database
+- `CACHE_STORE`: database
+- `QUEUE_CONNECTION`: database
+- Dan lainnya...
 
-Aplikasi ini menggunakan SQLite sebagai database, sehingga tidak perlu membuat database terpisah di Render. File database SQLite akan dibuat otomatis saat deployment.
+## Deployment Steps untuk Render
 
-### 3. Deploy Web Service
+### 1. Create a New Web Service
 
-1. Di dashboard Render, klik "New +"
-2. Pilih "Web Service"
-3. Connect repository Anda
-4. Isi konfigurasi:
-   - **Name**: `howlson`
-   - **Environment**: `Docker`
-   - **Plan**: Free (atau sesuai kebutuhan)
-   - **Branch**: `main`
+1. Log in to your Render dashboard
+2. Click "New +" and select "Web Service"
+3. Connect your Git repository
+4. Configure the service:
+   - **Name**: `howlson` (or your preferred name)
+   - **Environment**: `Node`
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `./start.sh`
+   - **Instance Type**: Free tier is sufficient for testing
 
-### 4. Konfigurasi Environment Variables
+### 2. Environment Variables (Opsional)
 
-Tambahkan environment variables berikut di settings web service:
+Jika Anda ingin override environment variables default, tambahkan di Render dashboard. Namun, semua sudah dikonfigurasi di `render.yaml`.
 
-```
-APP_NAME=Howlson
-APP_ENV=production
-APP_KEY=[Generate new key]
-APP_DEBUG=false
-APP_URL=https://howlson.onrender.com
+### 3. Deploy
 
-LOG_CHANNEL=errorlog
-LOG_LEVEL=error
-
-DB_CONNECTION=sqlite
-DB_DATABASE=/var/www/database/database.sqlite
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-BROADCAST_CONNECTION=log
-FILESYSTEM_DISK=local
-```
-
-### 5. Generate APP_KEY
-
-Untuk generate APP_KEY baru:
-1. Jalankan `php artisan key:generate --show` di local
-2. Copy hasilnya ke environment variable `APP_KEY`
-
-### 6. Deploy
-
-1. Klik "Create Web Service"
-2. Render akan otomatis:
-   - Clone repository
-   - Build aplikasi menggunakan Dockerfile
-   - Deploy ke production
-
-### 7. Verifikasi Deployment
-
-1. Tunggu hingga build selesai (biasanya 5-10 menit)
-2. Akses URL aplikasi: `https://howlson.onrender.com`
-3. Pastikan aplikasi berjalan dengan baik
+1. Click "Create Web Service"
+2. Render akan otomatis menjalankan deployment
+3. `APP_KEY` akan di-generate otomatis
+4. Database akan disetup otomatis
+5. Aplikasi akan tersedia di `https://your-service-name.onrender.com`
 
 ## Troubleshooting
 
