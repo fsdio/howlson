@@ -4,41 +4,37 @@
 
 ### 1. Error 500 - Internal Server Error
 
-#### Possible Causes:
-- Database connection issues
-- Missing APP_KEY
-- File permissions
-- Missing dependencies
-- Configuration cache issues
+**CRITICAL: Path Consistency Fixed**
+All database paths have been standardized to: `/opt/render/project/src/database/database.sqlite`
 
-#### Solutions:
+**Possible causes:**
+- Database connection issues (FIXED: Path inconsistency resolved)
+- Missing APP_KEY (FIXED: Auto-generated in render.yaml)
+- File permissions problems (FIXED: Proper permissions set)
+- Cache configuration issues (FIXED: Cache clearing added to startup)
+- Environment variables not set properly
 
-**Check Database Connection:**
+**Solutions:**
+1. Check database file exists and is writable:
 ```bash
-# Test SQLite database
-php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'OK'; } catch(Exception \$e) { echo \$e->getMessage(); }"
+ls -la /opt/render/project/src/database/database.sqlite
 ```
 
-**Check APP_KEY:**
+2. Test database connection:
 ```bash
-# Generate new APP_KEY if missing
-php artisan key:generate
+php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'OK'; } catch(Exception \$e) { echo \$e->getMessage(); }"
 ```
 
-**Clear Cache:**
-```bash
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
-```
+3. Verify environment variables in Render Dashboard:
+   - APP_KEY (should be auto-generated)
+   - DB_CONNECTION=sqlite
+   - DB_DATABASE=/opt/render/project/src/database/database.sqlite
+   - SESSION_DRIVER=database
+   - CACHE_STORE=database
+   - QUEUE_CONNECTION=database
 
-**Check File Permissions:**
-```bash
-chmod -R 775 storage
-chmod -R 775 bootstrap/cache
-chmod 664 database/database.sqlite
-```
+4. Check Render deployment logs for specific errors
+5. If still failing, temporarily set APP_DEBUG=true to see detailed errors
 
 ### 2. Build Failures
 

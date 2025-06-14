@@ -15,12 +15,12 @@ services:
       echo "Building frontend assets..."
       bun run build
       echo "Setting up database..."
-      mkdir -p database
-      touch database/database.sqlite
-      chmod 664 database/database.sqlite
-      chmod 775 database
+      mkdir -p /opt/render/project/src/database
+      touch /opt/render/project/src/database/database.sqlite
+      chmod 664 /opt/render/project/src/database/database.sqlite
+      chmod 775 /opt/render/project/src/database
       echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'Database OK\n'; } catch(Exception \$e) { echo 'DB Error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database OK\n'; } catch(Exception \$e) { echo 'DB Error: ' . \$e->getMessage() . '\n'; exit(1); }"
       echo "Caching configuration..."
       php artisan config:cache
       php artisan route:cache
@@ -29,16 +29,44 @@ services:
     startCommand: |
       set -e
       echo "Starting application..."
-      echo "Checking database file..."
-      if [ ! -f "database/database.sqlite" ]; then
-        echo "Creating database file..."
-        touch database/database.sqlite
-        chmod 664 database/database.sqlite
+      
+      # Check critical environment variables
+      echo "Checking environment variables..."
+      if [ -z "$APP_KEY" ]; then
+        echo "ERROR: APP_KEY is not set!"
+        exit 1
       fi
+      if [ -z "$PORT" ]; then
+        echo "ERROR: PORT is not set!"
+        exit 1
+      fi
+      
+      echo "Checking database file..."
+      if [ ! -f "/opt/render/project/src/database/database.sqlite" ]; then
+        echo "Creating database file..."
+        mkdir -p /opt/render/project/src/database
+        touch /opt/render/project/src/database/database.sqlite
+        chmod 664 /opt/render/project/src/database/database.sqlite
+        chmod 775 /opt/render/project/src/database
+      fi
+      
       echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      
+      echo "Clearing cache..."
+      php artisan config:clear
+      php artisan cache:clear
+      php artisan view:clear
+      php artisan route:clear
+      
       echo "Running migrations..."
       php artisan migrate --force
+      
+      echo "Caching for production..."
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+      
       echo "Starting server on port $PORT..."
       php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
@@ -60,3 +88,13 @@ services:
         value: database
       - key: LOG_CHANNEL
         value: errorlog
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /opt/render/project/src/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
