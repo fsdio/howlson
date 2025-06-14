@@ -8,7 +8,9 @@
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix",
-        "vercel-build": "bun run build"
+        "vercel-build": "bun run build",
+        "render-build": "chmod +x build.sh && ./build.sh",
+        "render-start": "chmod +x start.sh && ./start.sh"
     },
     "devDependencies": {
         "@eslint/js": "^9.19.0",

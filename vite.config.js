@@ -25,11 +25,20 @@ export default defineConfig({
             host: 'localhost',
         },
         cors: true,
-        allowedHosts: ['howlson.onrender.com'],
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+        allowedHosts: ['howlson.onrender.com', 'localhost'],
+    },
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            input: {
+                app: 'resources/js/app.js',
+            },
         },
     },
     base: process.env.NODE_ENV === 'production' ? '/' : '/',
