@@ -19,15 +19,15 @@ RUN apt-get update && apt-get install -y \
     npm \
     && apt-get upgrade -y sqlite3 libsqlite3-dev
 
+# Install PHP extensions first
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite
+
 # Install bun
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:$PATH"
-#13 ERROR: process "/bin/sh -c docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite" did not complete successfully: exit code: 1
+
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

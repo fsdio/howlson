@@ -4,20 +4,42 @@ services:
     env: php
     plan: free
     buildCommand: |
-      composer install --no-dev --optimize-autoloader
+      set -e
+      echo "Installing PHP dependencies..."
+      composer install --no-dev --optimize-autoloader --no-interaction
+      echo "Installing Bun..."
       curl -fsSL https://bun.sh/install | bash
       export PATH="$HOME/.bun/bin:$PATH"
+      echo "Installing Node dependencies..."
       bun install
+      echo "Building frontend assets..."
       bun run build
+      echo "Setting up database..."
       mkdir -p database
       touch database/database.sqlite
       chmod 664 database/database.sqlite
       chmod 775 database
+      echo "Testing database connection..."
+      php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'Database OK\n'; } catch(Exception \$e) { echo 'DB Error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      echo "Caching configuration..."
       php artisan config:cache
       php artisan route:cache
       php artisan view:cache
+      echo "Build completed successfully!"
     startCommand: |
+      set -e
+      echo "Starting application..."
+      echo "Checking database file..."
+      if [ ! -f "database/database.sqlite" ]; then
+        echo "Creating database file..."
+        touch database/database.sqlite
+        chmod 664 database/database.sqlite
+      fi
+      echo "Testing database connection..."
+      php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      echo "Running migrations..."
       php artisan migrate --force
+      echo "Starting server on port $PORT..."
       php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_ENV

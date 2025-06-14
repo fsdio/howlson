@@ -37,6 +37,10 @@ chmod -R 775 bootstrap/cache
 chmod 664 database/database.sqlite
 chmod 775 database
 
+# Test database connection
+echo "Testing database connection..."
+php -r "try { \$pdo = new PDO('sqlite:database/database.sqlite'); echo 'Database connection successful\n'; } catch(Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage() . '\n'; exit(1); }"
+
 # Cache Laravel configuration
 echo "Caching Laravel configuration..."
 php artisan config:cache
