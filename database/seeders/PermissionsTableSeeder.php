@@ -14,22 +14,55 @@ class PermissionsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        //permission users
-        Permission::create(['id' => Str::uuid(), 'name' => 'users index', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'users create', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'users edit', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'users delete', 'guard_name' => 'web']);
-
-        //permission roles
-        Permission::create(['id' => Str::uuid(), 'name' => 'roles index', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'roles create', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'roles edit', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'roles delete', 'guard_name' => 'web']);
-
-        //permission permissions
-        Permission::create(['id' => Str::uuid(), 'name' => 'permissions index', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'permissions create', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'permissions edit', 'guard_name' => 'web']);
-        Permission::create(['id' => Str::uuid(), 'name' => 'permissions delete', 'guard_name' => 'web']);
+        $permissions = [
+            // Users permissions
+            'users index',
+            'users create',
+            'users edit',
+            'users delete',
+            
+            // Roles permissions
+            'roles index',
+            'roles create',
+            'roles edit',
+            'roles delete',
+            
+            // Permissions permissions
+            'permissions index',
+            'permissions create',
+            'permissions edit',
+            'permissions delete',
+            
+            // Blog permissions
+            'blogs index',
+            'blogs create',
+            'blogs edit',
+            'blogs delete',
+            
+            // Product permissions
+            'products index',
+            'products create',
+            'products edit',
+            'products delete',
+            
+            // Product Category permissions
+            'product-categories index',
+            'product-categories create',
+            'product-categories edit',
+            'product-categories delete',
+            
+            // Dashboard permission
+            'admin dashboard',
+        ];
+        
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission],
+                [
+                    'id' => Str::uuid(),
+                    'guard_name' => 'web'
+                ]
+            );
+        }
     }
 }

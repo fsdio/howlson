@@ -8,6 +8,9 @@ use Illuminate\Database\Seeder;
 use Database\Seeders\UserTableSeeder;
 use Database\Seeders\RolesTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
+use Database\Seeders\BlogSeeder;
+use Database\Seeders\ProductCategorySeeder;
+use Database\Seeders\ProductSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,5 +22,8 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesTableSeeder::class);
         $this->call(PermissionsTableSeeder::class);
         $this->call(UserTableSeeder::class);
+        $this->call(BlogSeeder::class);
+        $this->call(ProductCategorySeeder::class);
+        $this->call(ProductSeeder::class);
     }
 }

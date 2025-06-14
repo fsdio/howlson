@@ -1,23 +1,18 @@
 <script setup>
-import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-import Footer from '@/components/Footer.vue';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { getInitials } from '@/composables/useInitials';
-import { LogOut, Settings, Calendar, User, Clock } from 'lucide-vue-next';
+import { Head } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
+import { Calendar, User, Clock, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ref, computed, watch } from 'vue';
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
-const isAdmin = computed(() => user.value?.roles?.some(role => role.name === 'admin') || false);
+// State management
+const searchQuery = ref('');
+const selectedCategory = ref('');
+const filterActive = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 8;
 
-const handleLogout = () => {
-    router.flushAll();
-};
-
-// Dummy blog articles data
-const blogArticles = [
+// Dummy blog articles data (expanded for pagination)
+const allBlogArticles = [
     {
         id: 1,
         title: 'Menggali Makna Jeritan Jiwa dalam Seni Visual',
@@ -97,159 +92,296 @@ const blogArticles = [
         readTime: '9 min read',
         image: 'from-rose-500 to-pink-600',
         category: 'Seni Kontemporer'
+    },
+    {
+        id: 9,
+        title: 'Teknik Pencahayaan dalam Fotografi Portrait',
+        excerpt: 'Menguasai berbagai teknik pencahayaan untuk menghasilkan foto portrait yang dramatis dan berkarakter.',
+        author: 'Alex Thompson',
+        date: '2023-12-25',
+        readTime: '7 min read',
+        image: 'from-amber-500 to-orange-600',
+        category: 'Fotografi'
+    },
+    {
+        id: 10,
+        title: 'Seni Jalanan sebagai Ekspresi Sosial',
+        excerpt: 'Bagaimana seni jalanan menjadi medium untuk menyampaikan pesan sosial dan politik di era modern.',
+        author: 'Maya Putri',
+        date: '2023-12-22',
+        readTime: '6 min read',
+        image: 'from-violet-500 to-purple-600',
+        category: 'Seni & Filosofi'
+    },
+    {
+        id: 11,
+        title: 'Komposisi Warna dalam Desain Grafis',
+        excerpt: 'Prinsip-prinsip dasar komposisi warna yang efektif untuk menciptakan desain grafis yang menarik.',
+        author: 'Ryan Lee',
+        date: '2023-12-20',
+        readTime: '5 min read',
+        image: 'from-cyan-500 to-blue-600',
+        category: 'Seni Digital'
+    },
+    {
+        id: 12,
+        title: 'Meditasi Melalui Seni Lukis',
+        excerpt: 'Menggunakan seni lukis sebagai bentuk meditasi untuk mencapai ketenangan dan fokus mental.',
+        author: 'Sofia Martinez',
+        date: '2023-12-18',
+        readTime: '8 min read',
+        image: 'from-emerald-500 to-teal-600',
+        category: 'Psikologi Seni'
+    },
+    {
+        id: 13,
+        title: 'Fotografi Makro: Dunia dalam Detail',
+        excerpt: 'Eksplorasi dunia fotografi makro untuk menangkap keindahan detail yang tersembunyi.',
+        author: 'Kevin Zhang',
+        date: '2023-12-15',
+        readTime: '6 min read',
+        image: 'from-lime-500 to-green-600',
+        category: 'Fotografi'
+    },
+    {
+        id: 14,
+        title: 'Arsitektur sebagai Kanvas Kreatif',
+        excerpt: 'Memahami bagaimana arsitektur modern dapat menjadi medium ekspresi artistik yang powerful.',
+        author: 'Isabella Chen',
+        date: '2023-12-12',
+        readTime: '7 min read',
+        image: 'from-stone-500 to-gray-600',
+        category: 'Komposisi'
+    },
+    {
+        id: 15,
+        title: 'Seni Digital dalam Era AI',
+        excerpt: 'Bagaimana kecerdasan buatan mengubah landscape seni digital dan kreativitas manusia.',
+        author: 'Marcus Johnson',
+        date: '2023-12-10',
+        readTime: '9 min read',
+        image: 'from-fuchsia-500 to-pink-600',
+        category: 'Seni Digital'
+    },
+    {
+        id: 16,
+        title: 'Ekspresionisme dalam Seni Modern',
+        excerpt: 'Menelusuri gerakan ekspresionisme dan pengaruhnya terhadap seni visual kontemporer.',
+        author: 'Elena Rodriguez',
+        date: '2023-12-08',
+        readTime: '8 min read',
+        image: 'from-red-500 to-rose-600',
+        category: 'Seni Kontemporer'
     }
 ];
+
+// Get unique categories
+const categories = computed(() => {
+    const cats = [...new Set(allBlogArticles.map(article => article.category))];
+    return cats.sort();
+});
+
+// Filter and search functionality
+const filteredArticles = computed(() => {
+    let filtered = allBlogArticles;
+    
+    // Filter by category
+    if (selectedCategory.value) {
+        filtered = filtered.filter(article => article.category === selectedCategory.value);
+    }
+    
+    // Filter by search query
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter(article => 
+            article.title.toLowerCase().includes(query) ||
+            article.excerpt.toLowerCase().includes(query) ||
+            article.author.toLowerCase().includes(query) ||
+            article.category.toLowerCase().includes(query)
+        );
+    }
+    
+    return filtered;
+});
+
+// Pagination computed properties
+const totalPages = computed(() => {
+    return Math.ceil(filteredArticles.value.length / itemsPerPage);
+});
+
+const displayedArticles = computed(() => {
+    const startIndex = (currentPage.value - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredArticles.value.slice(startIndex, endIndex);
+});
+
+const paginationInfo = computed(() => {
+    const start = filteredArticles.value.length === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage.value * itemsPerPage, filteredArticles.value.length);
+    return {
+        start,
+        end,
+        total: filteredArticles.value.length
+    };
+});
+
+// Pagination range for display
+const paginationRange = computed(() => {
+    const total = totalPages.value;
+    const current = currentPage.value;
+    const range = [];
+    
+    if (total <= 7) {
+        // Show all pages if total is 7 or less
+        for (let i = 1; i <= total; i++) {
+            range.push(i);
+        }
+    } else {
+        // Show smart pagination
+        if (current <= 4) {
+            // Show first 5 pages + ... + last page
+            for (let i = 1; i <= 5; i++) range.push(i);
+            if (total > 6) range.push('...');
+            range.push(total);
+        } else if (current >= total - 3) {
+            // Show first page + ... + last 5 pages
+            range.push(1);
+            if (total > 6) range.push('...');
+            for (let i = total - 4; i <= total; i++) range.push(i);
+        } else {
+            // Show first + ... + current-1, current, current+1 + ... + last
+            range.push(1);
+            range.push('...');
+            for (let i = current - 1; i <= current + 1; i++) range.push(i);
+            range.push('...');
+            range.push(total);
+        }
+    }
+    
+    return range;
+});
+
+// Functions
+const toggleFilter = () => {
+    filterActive.value = !filterActive.value;
+};
+
+const clearFilters = () => {
+    searchQuery.value = '';
+    selectedCategory.value = '';
+    currentPage.value = 1;
+};
+
+// Pagination functions
+const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+        // Scroll to top when changing page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
+
+const previousPage = () => {
+    if (currentPage.value > 1) {
+        goToPage(currentPage.value - 1);
+    }
+};
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        goToPage(currentPage.value + 1);
+    }
+};
+
+// Reset pagination when filters change
+const resetPagination = () => {
+    currentPage.value = 1;
+};
+
+// Watch for filter changes
+watch(searchQuery, resetPagination);
+watch(selectedCategory, resetPagination);
 </script>
 
 <template>
-
     <Head title="Blog" />
+    
+    <AuthenticatedLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Blog Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Blog Howlson</h1>
+                <p class="text-gray-600 mt-2">Eksplorasi seni, kreativitas, dan jeritan jiwa</p>
+            </div>
 
-    <div class="min-h-screen bg-gray-100">
-        <!-- Navigation Bar -->
-        <nav class="border-b border-gray-100 bg-white">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 justify-between">
-                    <div class="flex">
-                        <!-- Logo -->
-                        <div class="flex shrink-0 items-center">
-                            <Link :href="route('dashboard')" class="block h-9 w-auto fill-current text-gray-800">
-                            <svg viewBox="0 0 316 316" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9">
-                                <path
-                                    d="M305.8 81.125C305.77 80.995 305.69 80.885 305.65 80.755C305.56 80.525 305.49 80.285 305.37 80.075C305.29 79.935 305.17 79.815 305.07 79.685C304.94 79.515 304.83 79.325 304.68 79.175C304.55 79.045 304.39 78.955 304.25 78.845C304.09 78.715 303.95 78.575 303.77 78.475L251.32 48.275C249.97 47.495 248.31 47.495 246.96 48.275L194.51 78.475C194.33 78.575 194.19 78.725 194.03 78.845C193.89 78.955 193.73 79.045 193.6 79.175C193.45 79.325 193.34 79.515 193.21 79.685C193.11 79.815 192.99 79.935 192.91 80.075C192.79 80.285 192.72 80.525 192.63 80.755C192.58 80.875 192.51 80.995 192.48 81.125C192.38 81.495 192.33 81.875 192.33 82.265V139.625L148.62 164.795V52.575C148.62 52.185 148.57 51.805 148.47 51.435C148.44 51.305 148.36 51.195 148.32 51.065C148.23 50.835 148.16 50.595 148.04 50.385C147.96 50.245 147.84 50.125 147.74 49.995C147.61 49.825 147.5 49.635 147.35 49.485C147.22 49.355 147.06 49.265 146.92 49.155C146.76 49.025 146.62 48.885 146.44 48.785L93.99 18.585C92.64 17.805 90.98 17.805 89.63 18.585L37.18 48.785C37 48.885 36.86 49.035 36.7 49.155C36.56 49.265 36.4 49.355 36.27 49.485C36.12 49.635 36.01 49.825 35.88 49.995C35.78 50.125 35.66 50.245 35.58 50.385C35.46 50.595 35.39 50.835 35.3 51.065C35.25 51.185 35.18 51.305 35.15 51.435C35.05 51.805 35 52.185 35 52.575V232.235C35 233.795 35.84 235.245 37.19 236.025L142.1 296.425C142.33 296.555 142.58 296.635 142.82 296.725C142.93 296.765 143.04 296.835 143.16 296.865C143.53 296.965 143.9 297.015 144.28 297.015C144.66 297.015 145.03 296.965 145.4 296.865C145.5 296.835 145.59 296.775 145.69 296.745C145.95 296.655 146.21 296.565 146.45 296.435L251.36 236.035C252.72 235.255 253.55 233.815 253.55 232.245V174.885L303.81 145.945C305.17 145.165 306 143.725 306 142.155V82.265C305.95 81.875 305.9 81.495 305.8 81.125ZM144.2 227.205L100.57 202.515L146.39 176.135L196.66 147.195L240.33 172.335L208.29 190.625L144.2 227.205ZM244.75 114.995V164.795L226.39 154.225L201.03 139.625V89.825L219.39 100.395L244.75 114.995ZM249.12 57.105L292.81 82.265L249.12 107.425L205.43 82.265L249.12 57.105ZM114.49 184.425L96.13 194.995V85.305L121.49 70.705L139.85 60.135V169.815L114.49 184.425ZM91.76 27.925L135.45 53.085L91.76 78.245L48.07 53.085L91.76 27.925ZM202.49 213.655L144.2 252.125L85.91 213.655V81.875L144.2 43.405L202.49 81.875V213.655Z" />
-                            </svg>
-                            </Link>
-                        </div>
-
-                        <!-- Navigation Links -->
-                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <Link :href="route('dashboard')"
-                                class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none">
-                            Dashboard
-                            </Link>
-
-                            <!-- User Navigation -->
-                            <template v-if="!isAdmin">
-                                <Link :href="route('blog.index')"
-                                    class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none">
-                                    Blog
-                                </Link>
-                                <Link :href="route('produk.index')"
-                                    class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none">
-                                    Produk
-                                </Link>
-                            </template>
-
-                            <!-- Admin Navigation -->
-                            <template v-if="isAdmin">
-                                <a href="#"
-                                    class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none">
-                                    Roles
-                                </a>
-                                <a href="#"
-                                    class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none">
-                                    Permissions
-                                </a>
-                                <a href="#"
-                                    class="inline-flex items-center border-b-2 border-indigo-400 px-1 pt-1 text-sm font-medium leading-5 text-gray-900 transition duration-150 ease-in-out focus:border-indigo-700 focus:outline-none">
-                                    Blog
-                                </a>
-                            </template>
-                        </div>
+            <!-- Search and Filter Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <!-- Search Bar -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-4">
+                    <div class="relative flex-grow">
+                        <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Cari artikel berdasarkan judul, konten, atau penulis..."
+                            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
                     </div>
-
-                    <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                        <!-- Settings Dropdown -->
-                        <div class="relative ms-3 z-50">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger :as-child="true">
-                                    <Button variant="ghost"
-                                        class="relative h-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary">
-                                        <div class="flex items-center gap-2 px-2">
-                                            <Avatar class="size-8 overflow-hidden rounded-full">
-                                                <AvatarImage v-if="user?.avatar" :src="user.avatar" :alt="user.name" />
-                                                <AvatarFallback
-                                                    class="rounded-lg bg-neutral-200 font-semibold text-black">
-                                                    {{ getInitials(user?.name) }}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <span class="text-sm font-medium text-gray-700">{{ user?.name }}</span>
-                                            <svg class="-me-0.5 ms-1 h-4 w-4 text-gray-500"
-                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" class="w-56">
-                                    <DropdownMenuLabel class="p-0 font-normal">
-                                        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                            <Avatar class="size-8 overflow-hidden rounded-full">
-                                                <AvatarImage v-if="user?.avatar" :src="user.avatar" :alt="user.name" />
-                                                <AvatarFallback
-                                                    class="rounded-lg bg-neutral-200 font-semibold text-black">
-                                                    {{ getInitials(user?.name) }}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div class="grid flex-1 text-left text-sm leading-tight">
-                                                <span class="truncate font-semibold">{{ user?.name }}</span>
-                                                <span class="truncate text-xs text-muted-foreground">{{ user?.email
-                                                    }}</span>
-                                            </div>
-                                        </div>
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuGroup>
-                                        <DropdownMenuItem :as-child="true">
-                                            <Link class="block w-full" :href="route('profile.edit')" prefetch
-                                                as="button">
-                                            <Settings class="mr-2 h-4 w-4" />
-                                            Settings
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuGroup>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem :as-child="true">
-                                        <Link class="block w-full" method="post" :href="route('logout')"
-                                            @click="handleLogout" as="button">
-                                        <LogOut class="mr-2 h-4 w-4" />
-                                        Log out
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                    <div class="flex gap-2 sm:gap-3">
+                        <button
+                            @click="toggleFilter"
+                            :class="[
+                                'flex-1 sm:flex-none flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap',
+                                filterActive ? 'bg-indigo-700 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            ]"
+                        >
+                            <Filter class="w-4 h-4" />
+                            <span class="hidden sm:inline">{{ filterActive ? 'Sembunyikan Filter' : 'Tampilkan Filter' }}</span>
+                            <span class="sm:hidden">{{ filterActive ? 'Sembunyikan' : 'Filter' }}</span>
+                        </button>
+                        <button
+                            @click="clearFilters"
+                            class="flex-1 sm:flex-none bg-gray-500 text-white px-3 sm:px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors whitespace-nowrap"
+                        >
+                            <span class="hidden sm:inline">Reset Filter</span>
+                            <span class="sm:hidden">Reset</span>
+                        </button>
                     </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Main Content -->
-        <div class="relative">
-            <!-- Hero Section -->
-            <div class="relative bg-white py-16">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div class="animate-fade-in-up">
-                        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-                            BLOG howlson
-                        </h1>
-                        <p class="text-xl md:text-2xl text-gray-600 mb-8 italic">
-                            "Eksplorasi Jiwa Melalui Kata dan Gambar"
-                        </p>
-                        <div class="w-24 h-1 bg-indigo-600 mx-auto"></div>
+                <!-- Advanced Filters -->
+                <div v-show="filterActive" class="bg-gray-50 rounded-lg p-4 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Category Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                            <select
+                                v-model="selectedCategory"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">Semua Kategori</option>
+                                <option v-for="category in categories" :key="category" :value="category">
+                                    {{ category }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Results Info -->
+                        <div class="flex items-end">
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium">{{ filteredArticles.length }}</span> artikel ditemukan
+                                <span v-if="totalPages > 1" class="block text-xs text-gray-500 mt-1">
+                                    Halaman {{ currentPage }} dari {{ totalPages }} • Menampilkan {{ paginationInfo.start }}-{{ paginationInfo.end }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Blog Articles Section -->
-            <div class="px-4 sm:px-6 lg:px-8 py-12">
-                <div class="max-w-7xl mx-auto">
-                    <!-- Articles Grid (4x2) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <Link v-for="article in blogArticles" :key="article.id" :href="route('blog.detail', article.id)"
+            <div v-if="displayedArticles.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <Link v-for="article in displayedArticles" :key="article.id" :href="route('blog.detail', article.id)"
                             class="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden cursor-pointer block">
 
                         <!-- Article Image/Gradient -->
@@ -309,20 +441,94 @@ const blogArticles = [
                         </Link>
                     </div>
 
-                    <!-- Load More Button -->
-                    <div class="text-center mt-12">
-                        <button
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-md font-semibold transition-all duration-300 shadow-sm">
-                            Muat Artikel Lainnya
-                        </button>
+                    <!-- Pagination Section -->
+                    <div v-if="displayedArticles.length > 0 && totalPages > 1" class="mt-8">
+                        <!-- Pagination Info -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                            <div class="text-sm text-gray-600">
+                                Menampilkan {{ paginationInfo.start }} - {{ paginationInfo.end }} dari {{ paginationInfo.total }} artikel
+                            </div>
+                            
+                            <!-- Items per page selector (optional) -->
+                            <div class="text-sm text-gray-500">
+                                Halaman {{ currentPage }} dari {{ totalPages }}
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div class="flex justify-center">
+                            <nav class="flex items-center gap-1" aria-label="Pagination">
+                                <!-- Previous Button -->
+                                <button
+                                    @click="previousPage"
+                                    :disabled="currentPage === 1"
+                                    class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-500 transition-colors"
+                                >
+                                    <ChevronLeft class="w-4 h-4" />
+                                    <span class="hidden sm:inline">Sebelumnya</span>
+                                </button>
+                                
+                                <!-- Page Numbers -->
+                                <template v-for="(page, index) in paginationRange" :key="index">
+                                    <button
+                                        v-if="page !== '...'"
+                                        @click="goToPage(page)"
+                                        :class="[
+                                            'px-3 py-2 text-sm font-medium border-t border-b transition-colors',
+                                            currentPage === page
+                                                ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
+                                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                                        ]"
+                                    >
+                                        {{ page }}
+                                    </button>
+                                    <span
+                                        v-else
+                                        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border-t border-b border-gray-300"
+                                    >
+                                        ...
+                                    </span>
+                                </template>
+                                
+                                <!-- Next Button -->
+                                <button
+                                    @click="nextPage"
+                                    :disabled="currentPage === totalPages"
+                                    class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-500 transition-colors"
+                                >
+                                    <span class="hidden sm:inline">Selanjutnya</span>
+                                    <ChevronRight class="w-4 h-4" />
+                                </button>
+                            </nav>
+                        </div>
                     </div>
+
+            <!-- Empty State -->
+            <div v-else class="text-center py-12">
+                <div class="max-w-md mx-auto">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Search class="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada artikel ditemukan</h3>
+                    <p class="text-gray-500 mb-4">
+                        <span v-if="searchQuery || selectedCategory">
+                            Coba ubah kata kunci pencarian atau filter kategori.
+                        </span>
+                        <span v-else>
+                            Belum ada artikel yang tersedia saat ini.
+                        </span>
+                    </p>
+                    <button
+                        v-if="searchQuery || selectedCategory"
+                        @click="clearFilters"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                        Reset Filter
+                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <Footer />
-    </div>
+    </AuthenticatedLayout>
 </template>
 
 <style scoped>

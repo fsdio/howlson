@@ -16,24 +16,42 @@ class UserTableSeeder extends Seeder
      */
     public function run(): void
     {
-        //create user
-        $user = User::create([
-            'id'        => Str::uuid(),
-            'name'      => 'syahrizaldev',
-            'email'     => 'izaldev@gmail.com',
-            'password'  => bcrypt('password'),
-        ]);
+        // Create or get admin user
+        $user = User::firstOrCreate(
+            ['email' => 'izaldev@gmail.com'],
+            [
+                'id' => Str::uuid(),
+                'name' => 'syahrizaldev',
+                'password' => bcrypt('asdf1234'),
+            ]
+        );
 
-        //get all permissions
+        // Get all permissions
         $permissions = Permission::all();
 
-        //get role admin
+        // Get role admin
         $role = Role::where('name', 'admin')->first();
 
-        //assign permission to role
-        $role->syncPermissions($permissions);
+        if ($role) {
+            // Assign all permissions to admin role
+            $role->syncPermissions($permissions);
 
-        //assign role to user
-        $user->assignRole($role);
+            // Assign admin role to user if not already assigned
+            if (!$user->hasRole('admin')) {
+                $user->assignRole($role);
+            }
+        }
+        
+        // Create a regular user role if it doesn't have permissions
+        $userRole = Role::where('name', 'user')->first();
+        if ($userRole && $userRole->permissions->isEmpty()) {
+            // Give basic permissions to user role
+            $basicPermissions = $permissions->whereIn('name', [
+                'blogs index',
+                'products index',
+                'product-categories index'
+            ]);
+            $userRole->syncPermissions($basicPermissions);
+        }
     }
 }

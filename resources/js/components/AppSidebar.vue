@@ -8,8 +8,11 @@ import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
-// Menggunakan composable terpusat untuk navigasi
-const { mainNavItems, footerNavItems } = useNavigation();
+// Using centralized navigation composable with role-based navigation
+const { dynamicNavItems, footerNavItems, isAdmin } = useNavigation();
+
+// Use dynamic navigation items based on user role
+const navItems = dynamicNavItems;
 
 // Footer items dengan icon yang sudah di-import
 const footerItems = [
@@ -41,7 +44,7 @@ const footerItems = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="navItems" />
         </SidebarContent>
 
         <SidebarFooter>

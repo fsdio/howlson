@@ -14,13 +14,20 @@ class RolesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create([
-            'id' => Str::uuid(),
-            'name' => 'admin',
-        ]);
-        Role::create([
-            'id' => Str::uuid(),
-            'name' => 'user',
-        ]);
+        Role::firstOrCreate(
+            ['name' => 'admin'],
+            [
+                'id' => Str::uuid(),
+                'guard_name' => 'web'
+            ]
+        );
+        
+        Role::firstOrCreate(
+            ['name' => 'user'],
+            [
+                'id' => Str::uuid(),
+                'guard_name' => 'web'
+            ]
+        );
     }
 }

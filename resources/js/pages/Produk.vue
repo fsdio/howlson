@@ -116,28 +116,32 @@ function closeModal() {
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
           <!-- Search Bar -->
-          <div class="flex items-center space-x-4 mb-4">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-4">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Cari produk berdasarkan nama atau deskripsi..."
               class="flex-grow rounded-lg px-4 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
-            <button
-              @click="toggleFilter"
-              :class="[
-                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-                filterActive ? 'bg-indigo-700 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              ]"
-            >
-              {{ filterActive ? 'Sembunyikan Filter' : 'Tampilkan Filter' }}
-            </button>
-            <button
-              @click="clearFilters"
-              class="bg-gray-500 text-white px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              Reset Filter
-            </button>
+            <div class="flex gap-2 sm:gap-3">
+              <button
+                @click="toggleFilter"
+                :class="[
+                  'flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap',
+                  filterActive ? 'bg-indigo-700 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                ]"
+              >
+                <span class="hidden sm:inline">{{ filterActive ? 'Sembunyikan Filter' : 'Tampilkan Filter' }}</span>
+                <span class="sm:hidden">{{ filterActive ? 'Sembunyikan' : 'Filter' }}</span>
+              </button>
+              <button
+                @click="clearFilters"
+                class="flex-1 sm:flex-none bg-gray-500 text-white px-3 sm:px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors whitespace-nowrap"
+              >
+                <span class="hidden sm:inline">Reset Filter</span>
+                <span class="sm:hidden">Reset</span>
+              </button>
+            </div>
           </div>
 
           <!-- Advanced Filters -->

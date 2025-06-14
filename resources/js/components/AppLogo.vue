@@ -7,6 +7,6 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
         <AppLogoIcon class="size-5 fill-current text-white" />
     </div>
     <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate font-semibold leading-none">howlson</span>
+        <span class="mb-0.5 truncate font-bold text-lg leading-none tracking-wide text-gray-900 dark:text-white">HOWLSON</span>
     </div>
 </template>

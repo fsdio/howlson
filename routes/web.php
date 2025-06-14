@@ -2,8 +2,15 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductCategoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -16,6 +23,13 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $user = Auth::user();
+    
+    // Redirect admin users to admin dashboard
+    if ($user && $user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+    
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -43,6 +57,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/produk', function () {
         return Inertia::render('Produk');
     })->name('produk.index');
+    
+    // Navbar Demo route
+    Route::get('/navbar-demo', function () {
+        return Inertia::render('NavbarDemo');
+    })->name('navbar.demo');
+    
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Role Management
+        Route::resource('roles', RoleController::class);
+        
+        // Permission Management
+        Route::resource('permissions', PermissionController::class);
+        
+        // Blog Management
+        Route::resource('blogs', BlogController::class);
+        
+        // Product Management
+        Route::resource('products', ProductController::class);
+        
+        // Product Category Management
+        Route::resource('product-categories', ProductCategoryController::class);
+    });
 });
 
 require __DIR__.'/auth.php';
