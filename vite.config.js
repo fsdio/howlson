@@ -25,6 +25,7 @@ export default defineConfig({
             host: 'localhost',
         },
         cors: true,
+        allowedHosts: ['howlson.onrender.com'],
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
