@@ -31,18 +31,9 @@ git push origin main
 2. Daftar atau login dengan akun GitHub/GitLab/Bitbucket
 3. Connect repository Anda
 
-### 2. Deploy Database (PostgreSQL)
+### 2. Database Configuration (SQLite)
 
-1. Di dashboard Render, klik "New +"
-2. Pilih "PostgreSQL"
-3. Isi konfigurasi:
-   - **Name**: `howlson-db`
-   - **Database**: `howlson`
-   - **User**: `howlson`
-   - **Plan**: Free (atau sesuai kebutuhan)
-4. Klik "Create Database"
-5. Tunggu hingga database selesai dibuat
-6. Catat connection details (host, port, database, user, password)
+Aplikasi ini menggunakan SQLite sebagai database, sehingga tidak perlu membuat database terpisah di Render. File database SQLite akan dibuat otomatis saat deployment.
 
 ### 3. Deploy Web Service
 
@@ -69,12 +60,8 @@ APP_URL=https://howlson.onrender.com
 LOG_CHANNEL=errorlog
 LOG_LEVEL=error
 
-DB_CONNECTION=pgsql
-DB_HOST=[Database host dari step 2]
-DB_PORT=5432
-DB_DATABASE=howlson
-DB_USERNAME=[Database username dari step 2]
-DB_PASSWORD=[Database password dari step 2]
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/www/database/database.sqlite
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -117,9 +104,9 @@ Untuk generate APP_KEY baru:
 
 ### Database Connection Error
 
-1. Pastikan environment variables database sudah benar
-2. Cek apakah database service sudah running
-3. Pastikan database credentials sesuai
+1. Pastikan environment variables database sudah benar (DB_CONNECTION=sqlite)
+2. Pastikan file database SQLite terbuat dengan permission yang benar
+3. Cek apakah direktori database memiliki permission write
 
 ### Assets Tidak Load
 

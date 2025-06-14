@@ -25,10 +25,17 @@ mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
 mkdir -p bootstrap/cache
 
+# Create database directory and SQLite file
+echo "Setting up SQLite database..."
+mkdir -p database
+touch database/database.sqlite
+
 # Set proper permissions
 echo "Setting permissions..."
 chmod -R 775 storage
 chmod -R 775 bootstrap/cache
+chmod 664 database/database.sqlite
+chmod 775 database
 
 # Cache Laravel configuration
 echo "Caching Laravel configuration..."

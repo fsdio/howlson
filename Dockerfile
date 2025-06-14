@@ -20,7 +20,7 @@ ENV PATH="/root/.bun/bin:$PATH"
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_pgsql
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -46,8 +46,15 @@ RUN mkdir -p /var/www/storage/framework/sessions
 RUN mkdir -p /var/www/storage/framework/views
 RUN mkdir -p /var/www/bootstrap/cache
 
+# Create database directory and SQLite file
+RUN mkdir -p /var/www/database
+RUN touch /var/www/database/database.sqlite
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage
+RUN chown -R www-data:www-data /var/www/database
+RUN chmod 664 /var/www/database/database.sqlite
+RUN chmod 775 /var/www/database
 RUN chown -R www-data:www-data /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage
 RUN chmod -R 775 /var/www/bootstrap/cache
