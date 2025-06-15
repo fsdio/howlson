@@ -145,6 +145,28 @@ If you encounter this error during Docker deployment:
    # Or the script will create a basic .env file automatically
    ```
 
+### Database Error: "Database file does not exist"
+If you encounter SQLite database path errors:
+
+1. **Absolute Path Issue**: The database path must be absolute
+   - Docker: Uses `/var/www/database/database.sqlite`
+   - Render: Uses `$(pwd)/database/database.sqlite`
+   - Both deployment scripts now automatically set absolute paths
+
+2. **Check Database Creation**: Ensure the database file is created
+   ```bash
+   # Check if database file exists
+   ls -la database/database.sqlite
+   # Should show the file with proper permissions
+   ```
+
+3. **Environment Variable**: Verify DB_DATABASE in .env
+   ```bash
+   # Should be absolute path, not relative
+   DB_DATABASE=/var/www/database/database.sqlite  # Docker
+   DB_DATABASE=/opt/render/project/src/database/database.sqlite  # Render
+   ```
+
 ### Build Gagal
 
 1. Cek logs di Render dashboard

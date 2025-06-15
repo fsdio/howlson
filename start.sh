@@ -23,12 +23,6 @@ php -r "try { \$pdo = new PDO('sqlite:' . getcwd() . '/database/database.sqlite'
 echo "Running database migrations..."
 php artisan migrate --force
 
-# Clear and cache config for production
-echo "Optimizing for production..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
 # Generate APP_KEY if not set or is placeholder
 echo "Checking APP_KEY..."
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:GENERATE_NEW_KEY_IN_RENDER_DASHBOARD" ]; then
@@ -45,6 +39,18 @@ if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:GENERATE_NEW_KEY_IN_RENDER_DASHBO
 else
     echo "Using existing APP_KEY: $APP_KEY"
 fi
+
+# Ensure DB_DATABASE uses absolute path for Render deployment
+if [ -f ".env" ]; then
+    echo "Setting absolute database path for Render..."
+    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=$(pwd)/database/database.sqlite|" .env
+fi
+
+# Clear and cache config for production
+echo "Optimizing for production..."
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
 # Start the Laravel application
 echo "Starting Laravel server on port ${PORT:-8000}..."
