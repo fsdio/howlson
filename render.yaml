@@ -138,3 +138,13 @@ services:
         value: true
       - key: CACHE_PREFIX
         value: ${RENDER_SERVICE_NAME}_cache
+      # CORS Configuration
+      - key: CORS_ALLOWED_ORIGINS
+        value: ${RENDER_EXTERNAL_URL}
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: ${RENDER_EXTERNAL_HOSTNAME}
+      # Session Configuration for CORS
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: SESSION_SAME_SITE
+        value: none
