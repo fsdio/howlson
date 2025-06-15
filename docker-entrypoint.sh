@@ -64,6 +64,33 @@ EOF
     sed -i "s|^LOG_CHANNEL=.*|LOG_CHANNEL=errorlog|" .env
     sed -i "s|^LOG_LEVEL=.*|LOG_LEVEL=error|" .env
     
+    # Update CORS and Session configuration for production
+    if [ ! -z "$APP_URL" ]; then
+        sed -i "s|^APP_URL=.*|APP_URL=$APP_URL|" .env
+    fi
+    
+    # Add CORS configuration if not exists
+    if ! grep -q "CORS_ALLOWED_ORIGINS" .env; then
+        echo "CORS_ALLOWED_ORIGINS=$APP_URL,https://howlson.onrender.com" >> .env
+    fi
+    
+    if ! grep -q "SANCTUM_STATEFUL_DOMAINS" .env; then
+        echo "SANCTUM_STATEFUL_DOMAINS=howlson.onrender.com,localhost:8000" >> .env
+    fi
+    
+    # Add Session configuration for production
+    if ! grep -q "SESSION_DOMAIN" .env; then
+        echo "SESSION_DOMAIN=.onrender.com" >> .env
+    fi
+    
+    if ! grep -q "SESSION_SECURE_COOKIE" .env; then
+        echo "SESSION_SECURE_COOKIE=true" >> .env
+    fi
+    
+    if ! grep -q "SESSION_SAME_SITE" .env; then
+        echo "SESSION_SAME_SITE=none" >> .env
+    fi
+    
     echo ".env file updated successfully!"
 }
 
