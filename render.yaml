@@ -21,10 +21,10 @@ services:
       mkdir -p storage/framework/views
       mkdir -p bootstrap/cache
       echo "Setting up database..."
-      mkdir -p database
-      touch database/database.sqlite
-      chmod 664 database/database.sqlite
-      chmod 775 database
+      mkdir -p /opt/render/project/src/database
+      touch /opt/render/project/src/database/database.sqlite
+      chmod 664 /opt/render/project/src/database/database.sqlite
+      chmod 775 /opt/render/project/src/database
       echo "Setting permissions..."
       chmod -R 775 storage
       chmod -R 775 bootstrap/cache
@@ -45,16 +45,17 @@ services:
       fi
       
       echo "Checking database file..."
-      if [ ! -f "database/database.sqlite" ]; then
-        echo "Creating database file..."
-        mkdir -p database
-        touch database/database.sqlite
-        chmod 664 database/database.sqlite
-        chmod 775 database
+      DB_PATH="/opt/render/project/src/database/database.sqlite"
+      if [ ! -f "$DB_PATH" ]; then
+        echo "Creating database file at $DB_PATH..."
+        mkdir -p /opt/render/project/src/database
+        touch "$DB_PATH"
+         chmod 664 "$DB_PATH"
+         chmod 775 /opt/render/project/src/database
       fi
       
       echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:' . getcwd() . '/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
       
       echo "Running migrations..."
       php artisan migrate --force
@@ -84,7 +85,7 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
-        value: database/database.sqlite
+        value: /opt/render/project/src/database/database.sqlite
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_LIFETIME
