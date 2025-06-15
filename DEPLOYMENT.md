@@ -105,6 +105,46 @@ Jika Anda ingin override environment variables default, tambahkan di Render dash
 
 ## Troubleshooting
 
+### Error 500 - Internal Server Error
+If you encounter a 500 error after deployment:
+
+1. **Check APP_KEY**: Make sure APP_KEY is properly generated
+   ```bash
+   # For Render deployment, check logs for:
+   # "Generated APP_KEY: base64:..."
+   ```
+
+2. **Check Database**: Ensure SQLite database is created and accessible
+   ```bash
+   # Check if database file exists
+   ls -la database/database.sqlite
+   ```
+
+3. **Check Permissions**: Ensure proper file permissions
+   ```bash
+   # Set correct permissions
+   chmod 664 database/database.sqlite
+   chmod 775 database/
+   chmod -R 775 storage/
+   ```
+
+### Docker Build Error: "cannot stat '.env.example'"
+If you encounter this error during Docker deployment:
+
+1. **Check .dockerignore**: Ensure `.env.example` is not excluded
+   - The file should be available in the Docker build context
+   - Remove `.env.example` from `.dockerignore` if present
+
+2. **Fallback Solution**: The `docker-entrypoint.sh` script now includes a fallback
+   - If `.env.example` is missing, it creates a basic `.env` file
+   - This ensures the container can start even without `.env.example`
+
+3. **Manual Fix**: If the error persists
+   ```bash
+   # Ensure .env.example exists in your project root
+   # Or the script will create a basic .env file automatically
+   ```
+
 ### Build Gagal
 
 1. Cek logs di Render dashboard

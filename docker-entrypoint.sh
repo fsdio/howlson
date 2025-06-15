@@ -19,8 +19,32 @@ update_env_file() {
     
     # Create .env file if it doesn't exist
     if [ ! -f ".env" ]; then
-        echo "Creating .env file from .env.example..."
-        cp .env.example .env
+        if [ -f ".env.example" ]; then
+            echo "Creating .env file from .env.example..."
+            cp .env.example .env
+        else
+            echo "Creating basic .env file..."
+            cat > .env << EOF
+APP_NAME=Laravel
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=http://localhost:8000
+
+LOG_CHANNEL=errorlog
+LOG_LEVEL=error
+
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+
+CACHE_STORE=database
+
+QUEUE_CONNECTION=database
+EOF
+        fi
     fi
     
     # Update APP_KEY in .env file
