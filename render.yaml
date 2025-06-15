@@ -29,9 +29,35 @@ services:
       chmod -R 775 storage
       chmod -R 775 bootstrap/cache
       echo "Build completed successfully!"
+      
+      # Display build directory structure for debugging
+      echo "=== BUILD DIRECTORY STRUCTURE DEBUG ==="
+      echo "Build working directory: $(pwd)"
+      echo "Build directory contents:"
+      ls -la
+      echo "\nDatabase directory after build:"
+      ls -la database/ 2>/dev/null || echo "Database directory not found"
+      echo "\nFull project structure:"
+      find . -maxdepth 2 -type d | sort
+      echo "=== END BUILD DIRECTORY STRUCTURE DEBUG ==="
     startCommand: |
       set -e
       echo "Starting application..."
+      
+      # Display directory structure for debugging
+      echo "=== DIRECTORY STRUCTURE DEBUG ==="
+      echo "Current working directory: $(pwd)"
+      echo "Directory contents:"
+      ls -la
+      echo "\nProject root structure:"
+      find . -maxdepth 3 -type d | head -20
+      echo "\nLooking for database directory:"
+      find . -name "database" -type d 2>/dev/null || echo "No database directory found"
+      echo "\nChecking /opt/render/project/src structure:"
+      ls -la /opt/render/project/src/ 2>/dev/null || echo "Path /opt/render/project/src/ not found"
+      echo "\nChecking if database file exists at expected location:"
+      ls -la /opt/render/project/src/database/ 2>/dev/null || echo "Database directory not found at /opt/render/project/src/database/"
+      echo "=== END DIRECTORY STRUCTURE DEBUG ==="
       
       # Check critical environment variables
       echo "Checking environment variables..."
@@ -53,6 +79,20 @@ services:
          chmod 664 "$DB_PATH"
          chmod 775 /opt/render/project/src/database
       fi
+      
+      # Verify database creation and permissions
+      echo "=== DATABASE VERIFICATION ==="
+      echo "Checking database file existence and permissions:"
+      if [ -f "$DB_PATH" ]; then
+        echo "✅ Database file exists at: $DB_PATH"
+        ls -la "$DB_PATH"
+        echo "File size: $(stat -c%s "$DB_PATH" 2>/dev/null || echo 'unknown') bytes"
+      else
+        echo "❌ Database file NOT found at: $DB_PATH"
+      fi
+      echo "\nDatabase directory permissions:"
+      ls -la /opt/render/project/src/database/ 2>/dev/null || echo "Database directory not accessible"
+      echo "=== END DATABASE VERIFICATION ==="
       
       echo "Testing database connection..."
       php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
