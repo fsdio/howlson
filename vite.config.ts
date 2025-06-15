@@ -4,7 +4,6 @@ import path from 'path';
 // import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     plugins: [
@@ -27,6 +26,13 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './resources/js'),
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
+        },
+    },
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        hmr: {
+            host: 'localhost',
         },
     },
 });
