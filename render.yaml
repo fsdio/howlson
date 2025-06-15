@@ -21,43 +21,21 @@ services:
       mkdir -p storage/framework/views
       mkdir -p bootstrap/cache
       echo "Setting up database..."
-      mkdir -p /opt/render/project/src/database
-      touch /opt/render/project/src/database/database.sqlite
-      chmod 664 /opt/render/project/src/database/database.sqlite
-      chmod 775 /opt/render/project/src/database
+      mkdir -p database
+      touch database/database.sqlite
+      chmod 664 database/database.sqlite
+      chmod 775 database
       echo "Setting permissions..."
       chmod -R 775 storage
       chmod -R 775 bootstrap/cache
       echo "Build completed successfully!"
-      
-      # Display build directory structure for debugging
-      echo "=== BUILD DIRECTORY STRUCTURE DEBUG ==="
-      echo "Build working directory: $(pwd)"
-      echo "Build directory contents:"
-      ls -la
-      echo "\nDatabase directory after build:"
-      ls -la database/ 2>/dev/null || echo "Database directory not found"
-      echo "\nFull project structure:"
-      find . -maxdepth 2 -type d | sort
-      echo "=== END BUILD DIRECTORY STRUCTURE DEBUG ==="
+      echo "Database directory created at: $(pwd)/database/"
     startCommand: |
       set -e
       echo "Starting application..."
       
-      # Display directory structure for debugging
-      echo "=== DIRECTORY STRUCTURE DEBUG ==="
-      echo "Current working directory: $(pwd)"
-      echo "Directory contents:"
-      ls -la
-      echo "\nProject root structure:"
-      find . -maxdepth 3 -type d | head -20
-      echo "\nLooking for database directory:"
-      find . -name "database" -type d 2>/dev/null || echo "No database directory found"
-      echo "\nChecking /opt/render/project/src structure:"
-      ls -la /opt/render/project/src/ 2>/dev/null || echo "Path /opt/render/project/src/ not found"
-      echo "\nChecking if database file exists at expected location:"
-      ls -la /opt/render/project/src/database/ 2>/dev/null || echo "Database directory not found at /opt/render/project/src/database/"
-      echo "=== END DIRECTORY STRUCTURE DEBUG ==="
+      echo "Initializing application with relative paths..."
+      echo "Working directory: $(pwd)"
       
       # Check critical environment variables
       echo "Checking environment variables..."
@@ -71,31 +49,21 @@ services:
       fi
       
       echo "Checking database file..."
-      DB_PATH="/opt/render/project/src/database/database.sqlite"
+      DB_PATH="$(pwd)/database/database.sqlite"
+      echo "Auto-detected database path: $DB_PATH"
       if [ ! -f "$DB_PATH" ]; then
         echo "Creating database file at $DB_PATH..."
-        mkdir -p /opt/render/project/src/database
+        mkdir -p "$(pwd)/database"
         touch "$DB_PATH"
-         chmod 664 "$DB_PATH"
-         chmod 775 /opt/render/project/src/database
+        chmod 664 "$DB_PATH"
+        chmod 775 "$(pwd)/database"
       fi
       
-      # Verify database creation and permissions
-      echo "=== DATABASE VERIFICATION ==="
-      echo "Checking database file existence and permissions:"
-      if [ -f "$DB_PATH" ]; then
-        echo "✅ Database file exists at: $DB_PATH"
-        ls -la "$DB_PATH"
-        echo "File size: $(stat -c%s "$DB_PATH" 2>/dev/null || echo 'unknown') bytes"
-      else
-        echo "❌ Database file NOT found at: $DB_PATH"
-      fi
-      echo "\nDatabase directory permissions:"
-      ls -la /opt/render/project/src/database/ 2>/dev/null || echo "Database directory not accessible"
-      echo "=== END DATABASE VERIFICATION ==="
+      echo "Database setup completed at: $DB_PATH"
+      ls -la "$DB_PATH" 2>/dev/null || echo "Database file verification failed"
       
       echo "Testing database connection..."
-      php -r "try { \$pdo = new PDO('sqlite:/opt/render/project/src/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
+      php -r "try { \$pdo = new PDO('sqlite:' . getcwd() . '/database/database.sqlite'); echo 'Database connection OK\n'; } catch(Exception \$e) { echo 'Database error: ' . \$e->getMessage() . '\n'; exit(1); }"
       
       echo "Running migrations..."
       php artisan migrate --force
@@ -117,25 +85,25 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_URL
-        value: https://howlson.onrender.com
+        value: ${RENDER_EXTERNAL_URL}
       - key: LOG_CHANNEL
         value: errorlog
       - key: LOG_LEVEL
-        value: error
+        value: ${LOG_LEVEL:-error}
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
-        value: /opt/render/project/src/database/database.sqlite
+        value: database/database.sqlite
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_LIFETIME
-        value: 120
+        value: ${SESSION_LIFETIME:-120}
       - key: SESSION_ENCRYPT
         value: false
       - key: SESSION_PATH
         value: /
       - key: SESSION_DOMAIN
-        value: null
+        value: ${RENDER_EXTERNAL_HOSTNAME}
       - key: CACHE_STORE
         value: database
       - key: QUEUE_CONNECTION
@@ -147,7 +115,7 @@ services:
       - key: MAIL_MAILER
         value: log
       - key: MAIL_HOST
-        value: 127.0.0.1
+        value: localhost
       - key: MAIL_PORT
         value: 2525
       - key: MAIL_USERNAME
@@ -157,10 +125,16 @@ services:
       - key: MAIL_ENCRYPTION
         value: null
       - key: MAIL_FROM_ADDRESS
-        value: hello@example.com
+        value: noreply@${RENDER_SERVICE_NAME}.onrender.com
       - key: MAIL_FROM_NAME
         value: Howlson
       - key: BCRYPT_ROUNDS
-        value: 12
+        value: ${BCRYPT_ROUNDS:-12}
       - key: PHP_CLI_SERVER_WORKERS
-        value: 4
+        value: ${PHP_CLI_SERVER_WORKERS:-4}
+      - key: APP_TIMEZONE
+        value: ${TZ:-UTC}
+      - key: DB_FOREIGN_KEYS
+        value: true
+      - key: CACHE_PREFIX
+        value: ${RENDER_SERVICE_NAME}_cache

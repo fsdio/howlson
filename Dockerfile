@@ -41,6 +41,11 @@ COPY . /var/www
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www
 
+# Copy .env file for Docker deployment
+# Note: .env file is now included in the Docker image
+# Make sure to create .env file before building the image
+COPY --chown=www-data:www-data .env /var/www/.env
+
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 RUN bun install

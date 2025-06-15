@@ -35,7 +35,7 @@ LOG_CHANNEL=errorlog
 LOG_LEVEL=error
 
 DB_CONNECTION=sqlite
- DB_DATABASE=/var/www/database/database.sqlite
+ DB_DATABASE=database/database.sqlite
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -57,7 +57,7 @@ EOF
     sed -i "s|^APP_ENV=.*|APP_ENV=production|" .env
     sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" .env
     sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
-    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=/var/www/database/database.sqlite|" .env
+    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|" .env
     sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=database|" .env
     sed -i "s|^CACHE_STORE=.*|CACHE_STORE=database|" .env
     sed -i "s|^QUEUE_CONNECTION=.*|QUEUE_CONNECTION=database|" .env
