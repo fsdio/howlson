@@ -50,10 +50,10 @@ docker build -t howlson-app .
 docker run -p 8000:8000 howlson-app
 
 # Run dengan custom port
-docker run -p 3000:8000 -e PORT=8000 howlson-app
+docker run -p 3000:8000 -p 5173:5173 -e PORT=8000 howlson-app
 
 # Run dengan custom APP_KEY
-docker run -p 8000:8000 -e APP_KEY="your-app-key" howlson-app
+docker run -p 8000:8000 -p 5173:5173 -e APP_KEY="your-app-key" howlson-app
 ```
 
 ### 3. Run dengan Docker Compose (Opsional)
@@ -66,7 +66,8 @@ services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "8000:8000"  # Laravel server
+      - "5173:5173"  # Vite dev server
     environment:
       - APP_KEY=${APP_KEY}
       - APP_ENV=production
@@ -94,6 +95,15 @@ docker-compose up -d
 - `APP_ENV`: Environment (default: production)
 - `APP_DEBUG`: Debug mode (default: false)
 - `LOG_LEVEL`: Log level (default: error)
+
+## Akses Service
+
+Setelah container berjalan, Anda dapat mengakses:
+
+- **Laravel Application**: http://localhost:8000
+- **Vite Dev Server**: http://localhost:5173
+
+Vite dev server menyediakan hot module replacement (HMR) untuk development yang lebih cepat.
 
 ## Database
 

@@ -109,6 +109,21 @@ php artisan view:cache
 # Display final APP_KEY for verification
 echo "Final APP_KEY: $APP_KEY"
 
+# Start Vite dev server in background
+echo "Starting Vite dev server..."
+bun run dev &
+VITE_PID=$!
+
+# Function to handle shutdown gracefully
+shutdown() {
+    echo "Shutting down services..."
+    kill $VITE_PID 2>/dev/null
+    exit 0
+}
+
+# Trap signals to shutdown gracefully
+trap shutdown SIGTERM SIGINT
+
 # Start the Laravel application
 echo "Starting Laravel server on port ${PORT:-8000}..."
 exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}

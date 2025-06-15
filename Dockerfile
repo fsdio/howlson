@@ -73,8 +73,8 @@ RUN chmod -R 775 /var/www/bootstrap/cache
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Expose port 8000
-EXPOSE 8000
+# Expose port 8000 for Laravel and 5173 for Vite dev server
+EXPOSE 8000 5173
 
 # Use custom entrypoint script
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
