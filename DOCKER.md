@@ -72,8 +72,8 @@ services:
       - APP_ENV=production
       - APP_DEBUG=false
     volumes:
-      - ./storage:/var/www/howlson/storage
-      - ./database:/var/www/howlson/database
+      - ./storage:/var/www/storage
+      - ./database:/var/www/database
 ```
 
 Jalankan dengan:
@@ -97,7 +97,7 @@ docker-compose up -d
 
 ## Database
 
-- SQLite database akan dibuat otomatis di `/var/www/howlson/database/database.sqlite`
+- SQLite database akan dibuat otomatis di `/var/www/database/database.sqlite`
 - Migrations akan dijalankan otomatis saat container start
 - Database file akan persist selama container berjalan
 
@@ -107,11 +107,11 @@ docker-compose up -d
 
 ```bash
 # Check database file permissions
-docker exec -it <container-id> ls -la /var/www/howlson/database/
+docker exec -it <container-id> ls -la /var/www/database/
 
 # Fix permissions if needed
-docker exec -it <container-id> chown www-data:www-data /var/www/howlson/database/database.sqlite
-docker exec -it <container-id> chmod 664 /var/www/howlson/database/database.sqlite
+docker exec -it <container-id> chown www-data:www-data /var/www/database/database.sqlite
+docker exec -it <container-id> chmod 664 /var/www/database/database.sqlite
 ```
 
 ### 2. View Logs
@@ -121,7 +121,7 @@ docker exec -it <container-id> chmod 664 /var/www/howlson/database/database.sqli
 docker logs <container-id>
 
 # Laravel logs
-docker exec -it <container-id> tail -f /var/www/howlson/storage/logs/laravel.log
+docker exec -it <container-id> tail -f /var/www/storage/logs/laravel.log
 ```
 
 ### 3. Access Container Shell
@@ -153,8 +153,8 @@ docker run -d \
   -e APP_ENV=production \
   -e APP_DEBUG=false \
   -e APP_URL="https://yourdomain.com" \
-  -v /host/path/storage:/var/www/howlson/storage \
--v /host/path/database:/var/www/howlson/database \
+  -v /host/path/storage:/var/www/storage \
+   -v /host/path/database:/var/www/database \
   howlson-app:production
 ```
 

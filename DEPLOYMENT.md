@@ -149,7 +149,7 @@ If you encounter this error during Docker deployment:
 If you encounter SQLite database path errors:
 
 1. **Absolute Path Issue**: The database path must be absolute
-   - Docker: Uses `/var/www/howlson/database/database.sqlite`
+   - Docker: Uses `/var/www/database/database.sqlite`
    - Render: Uses `$(pwd)/database/database.sqlite`
    - Both deployment scripts now automatically set absolute paths
 
@@ -163,7 +163,7 @@ If you encounter SQLite database path errors:
 3. **Environment Variable**: Verify DB_DATABASE in .env
    ```bash
    # Should be absolute path, not relative
-   DB_DATABASE=/var/www/howlson/database/database.sqlite  # Docker
+   DB_DATABASE=/var/www/database/database.sqlite  # Docker
    DB_DATABASE=/opt/render/project/src/database/database.sqlite  # Render
    ```
 

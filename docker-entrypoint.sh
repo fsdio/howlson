@@ -35,7 +35,7 @@ LOG_CHANNEL=errorlog
 LOG_LEVEL=error
 
 DB_CONNECTION=sqlite
- DB_DATABASE=/var/www/howlson/database/database.sqlite
+ DB_DATABASE=/var/www/database/database.sqlite
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -57,7 +57,7 @@ EOF
     sed -i "s|^APP_ENV=.*|APP_ENV=production|" .env
     sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" .env
     sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
-    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=/var/www/howlson/database/database.sqlite|" .env
+    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=/var/www/database/database.sqlite|" .env
     sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=database|" .env
     sed -i "s|^CACHE_STORE=.*|CACHE_STORE=database|" .env
     sed -i "s|^QUEUE_CONNECTION=.*|QUEUE_CONNECTION=database|" .env
@@ -79,17 +79,17 @@ update_env_file
 
 # Check database file exists and is writable
 echo "Checking database file..."
-if [ ! -f "/var/www/howlson/database/database.sqlite" ]; then
+if [ ! -f "/var/www/database/database.sqlite" ]; then
     echo "Creating database file..."
-    mkdir -p /var/www/howlson/database
-    touch /var/www/howlson/database/database.sqlite
-    chmod 664 /var/www/howlson/database/database.sqlite
-    chmod 775 /var/www/howlson/database
+    mkdir -p /var/www/database
+    touch /var/www/database/database.sqlite
+    chmod 664 /var/www/database/database.sqlite
+    chmod 775 /var/www/database
 fi
 
 # Test database connection
 echo "Testing database connection..."
-php -r "try { \$pdo = new PDO('sqlite:/var/www/howlson/database/database.sqlite'); echo 'Database connection successful\n'; } catch(Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage() . '\n'; exit(1); }"
+php -r "try { \$pdo = new PDO('sqlite:/var/www/database/database.sqlite'); echo 'Database connection successful\n'; } catch(Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage() . '\n'; exit(1); }"
 
 # Run database migrations
 echo "Running database migrations..."

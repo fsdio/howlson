@@ -33,18 +33,18 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/howlson
+WORKDIR /var/www
 
 # Copy existing application directory contents
-COPY . /var/www/howlson
+COPY . /var/www
 
 # Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/howlson
+COPY --chown=www-data:www-data . /var/www
 
 # Copy .env file for Docker deployment
 # Note: .env file is now included in the Docker image
 # Make sure to create .env file before building the image
-COPY --chown=www-data:www-data .env /var/www/howlson/.env
+COPY --chown=www-data:www-data .env /var/www/.env
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
@@ -52,24 +52,24 @@ RUN bun install
 RUN bun run build
 
 # Create storage and cache directories
-RUN mkdir -p /var/www/howlson/storage/logs
-RUN mkdir -p /var/www/howlson/storage/framework/cache
-RUN mkdir -p /var/www/howlson/storage/framework/sessions
-RUN mkdir -p /var/www/howlson/storage/framework/views
-RUN mkdir -p /var/www/howlson/bootstrap/cache
+RUN mkdir -p /var/www/storage/logs
+RUN mkdir -p /var/www/storage/framework/cache
+RUN mkdir -p /var/www/storage/framework/sessions
+RUN mkdir -p /var/www/storage/framework/views
+RUN mkdir -p /var/www/bootstrap/cache
 
 # Create database directory and SQLite file
-RUN mkdir -p /var/www/howlson/database
-RUN touch /var/www/howlson/database/database.sqlite
+RUN mkdir -p /var/www/database
+RUN touch /var/www/database/database.sqlite
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/howlson/storage
-RUN chown -R www-data:www-data /var/www/howlson/database
-RUN chmod 664 /var/www/howlson/database/database.sqlite
-RUN chmod 775 /var/www/howlson/database
-RUN chown -R www-data:www-data /var/www/howlson/bootstrap/cache
-RUN chmod -R 775 /var/www/howlson/storage
-RUN chmod -R 775 /var/www/howlson/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage
+RUN chown -R www-data:www-data /var/www/database
+RUN chmod 664 /var/www/database/database.sqlite
+RUN chmod 775 /var/www/database
+RUN chown -R www-data:www-data /var/www/bootstrap/cache
+RUN chmod -R 775 /var/www/storage
+RUN chmod -R 775 /var/www/bootstrap/cache
 
 # Copy startup script
 COPY docker-entrypoint.sh /usr/local/bin/
