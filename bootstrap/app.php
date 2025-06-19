@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\TrustProxies;
@@ -19,14 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             TrustProxies::class,
-            \Illuminate\Http\Middleware\HandleCors::class,
+            CorsMiddleware::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         $middleware->api(append: [
-            \Illuminate\Http\Middleware\HandleCors::class,
+            CorsMiddleware::class,
         ]);
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);

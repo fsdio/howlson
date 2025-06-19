@@ -107,7 +107,7 @@ Vite dev server menyediakan hot module replacement (HMR) untuk development yang 
 
 ## Database
 
-- SQLite database akan dibuat otomatis di `/var/www/database/database.sqlite`
+- SQLite database akan dibuat otomatis di `database/database.sqlite`
 - Migrations akan dijalankan otomatis saat container start
 - Database file akan persist selama container berjalan
 
@@ -120,8 +120,8 @@ Vite dev server menyediakan hot module replacement (HMR) untuk development yang 
 docker exec -it <container-id> ls -la /var/www/database/
 
 # Fix permissions if needed
-docker exec -it <container-id> chown www-data:www-data /var/www/database/database.sqlite
-docker exec -it <container-id> chmod 664 /var/www/database/database.sqlite
+docker exec -it <container-id> chown www-data:www-data database/database.sqlite
+docker exec -it <container-id> chmod 664 database/database.sqlite
 ```
 
 ### 2. View Logs

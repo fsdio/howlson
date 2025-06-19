@@ -21,6 +21,8 @@ return [
 
     'allowed_origins' => [
         'https://howlson.onrender.com',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
     ],
 
     'allowed_origins_patterns' => [
@@ -31,9 +33,26 @@ return [
         '*.onrender.com',
     ],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => [
+        'Accept',
+        'Authorization',
+        'Content-Type',
+        'X-Requested-With',
+        'X-CSRF-TOKEN',
+        'X-XSRF-TOKEN',
+        'Origin',
+        'Cache-Control',
+        'Pragma',
+    ],
 
-    'exposed_headers' => [],
+    'exposed_headers' => [
+        'Cache-Control',
+        'Content-Language',
+        'Content-Type',
+        'Expires',
+        'Last-Modified',
+        'Pragma',
+    ],
 
     'max_age' => 0,
 
